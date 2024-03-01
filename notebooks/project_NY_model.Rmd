@@ -1,0 +1,128 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+# init
+
+```{python}
+import pandas as pd
+import warnings
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import train_test_split
+```
+
+# load data
+
+```{python}
+top_50_areas_df = pd.read_csv('/home/shaghayegh/class/New York project/top50areas.csv')
+top_50_areas_df
+```
+
+```{python}
+warnings.filterwarnings('ignore')
+```
+
+# prediction 
+
+
+## train/test split
+
+```{python}
+def train_test_split(dataset_df, split_date):
+    train_df = dataset_df[dataset_df['Date'] < split_date]
+    test_df = dataset_df[dataset_df['Date'] >= split_date]
+    return train_df, test_df
+
+train_df, test_df = train_test_split(top_50_areas_df, '2023-04-01')
+```
+
+```{python}
+train_df
+```
+
+```{python}
+test_df
+```
+
+```{python}
+FEATURES = ['1_day_lag', '2_days_lag',	'3_days_lag', '4_days_lag',	'5_days_lag', '6_days_lag',	'7_days_lag', '8_days_lag',	'9_days_lag', '10_days_lag']
+```
+
+```{python}
+LABEL = ['Daily_trips']
+```
+
+## methods
+
+
+### decision tree
+
+```{python active="", eval=FALSE}
+n_estimators = [int(x) for x in np.linspace(start = 100, stop = 2100, num = 40)]
+max_features = ['auto', 'sqrt']
+max_depth = [2,4]
+min_samples_split = [2,5]
+min_samples_leaf = [1,2]
+bootstrap = [True, False]
+```
+
+#### model
+
+```{python}
+dt = DecisionTreeRegressor(max_depth=16, min_samples_split=30, min_samples_leaf=40)
+dt.fit(train_df[FEATURES], train_df[LABEL])
+```
+
+#### predict
+
+```{python}
+label_pred_test_dt = dt.predict(test_df[FEATURES])
+```
+
+#### save
+
+```{python}
+test_df['Pred_dt'] = label_pred_test_dt
+test_df
+```
+
+### random forest
+
+```{python}
+rf = RandomForestRegressor(n_estimators=500)
+rf.fit(train_df[FEATURES], train_df[LABEL])
+```
+
+#### predict
+
+```{python}
+label_pred_test_rf = rf.predict(test_df[FEATURES])
+```
+
+#### save
+
+```{python}
+test_df['Pred_rf'] = label_pred_test_rf
+test_df
+```
+
+### save data set
+
+```{python}
+test_df.to_csv('/home/shaghayegh/class/New York project/test.csv', index=False)
+```
+
+```{python}
+
+```
