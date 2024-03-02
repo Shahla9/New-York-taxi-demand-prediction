@@ -14,29 +14,45 @@ jupyter:
 
 # init
 
+
+## imports
+
 ```{python}
+import os
 import pandas as pd
 import warnings
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.model_selection import train_test_split
+
+warnings.filterwarnings('ignore')
+```
+
+## configs
+
+```{python}
+DATASET_PATH = os.path.expanduser('~/class/new_york/data/dataset.csv')
+
+TRAIN_TEST_SPLIT_DATE = '2023-04-01'
+
+FEATURES = [
+    '1_day_lag', '2_day_lag', '3_day_lag', 
+    '4_day_lag', '5_day_lag', '6_day_lag',	
+    '7_day_lag', '8_day_lag', '9_day_lag', '10_day_lag'
+]
+LABEL = ['Daily_trips']
+
+PREDICTION_DATA_PATH = os.path.expanduser('~/class/new_york/data/test.csv')
 ```
 
 # load data
 
 ```{python}
-top_50_areas_df = pd.read_csv('/home/shaghayegh/class/New York project/top50areas.csv')
-top_50_areas_df
+dataset_df = pd.read_csv(DATASET_PATH)
+dataset_df
 ```
 
-```{python}
-warnings.filterwarnings('ignore')
-```
-
-# prediction 
-
-
-## train/test split
+# train/test split
 
 ```{python}
 def train_test_split(dataset_df, split_date):
@@ -44,10 +60,7 @@ def train_test_split(dataset_df, split_date):
     test_df = dataset_df[dataset_df['Date'] >= split_date]
     return train_df, test_df
 
-train_df, test_df = train_test_split(top_50_areas_df, '2023-04-01')
-```
-
-```{python}
+train_df, test_df = train_test_split(dataset_df, TRAIN_TEST_SPLIT_DATE )
 train_df
 ```
 
@@ -55,70 +68,42 @@ train_df
 test_df
 ```
 
-```{python}
-FEATURES = ['1_day_lag', '2_days_lag',	'3_days_lag', '4_days_lag',	'5_days_lag', '6_days_lag',	'7_days_lag', '8_days_lag',	'9_days_lag', '10_days_lag']
-```
-
-```{python}
-LABEL = ['Daily_trips']
-```
-
-## methods
+# methods
 
 
-### decision tree
+## decision tree
 
-```{python active="", eval=FALSE}
-n_estimators = [int(x) for x in np.linspace(start = 100, stop = 2100, num = 40)]
-max_features = ['auto', 'sqrt']
-max_depth = [2,4]
-min_samples_split = [2,5]
-min_samples_leaf = [1,2]
-bootstrap = [True, False]
-```
 
-#### model
+### training model
 
 ```{python}
 dt = DecisionTreeRegressor(max_depth=16, min_samples_split=30, min_samples_leaf=40)
 dt.fit(train_df[FEATURES], train_df[LABEL])
 ```
 
-#### predict
+### predict
 
 ```{python}
-label_pred_test_dt = dt.predict(test_df[FEATURES])
-```
-
-#### save
-
-```{python}
-test_df['Pred_dt'] = label_pred_test_dt
+test_df['Pred_dt'] = dt.predict(test_df[FEATURES])
 test_df
 ```
 
-### random forest
+## random forest
 
 ```{python}
 rf = RandomForestRegressor(n_estimators=500)
 rf.fit(train_df[FEATURES], train_df[LABEL])
 ```
 
-#### predict
+### predict
 
 ```{python}
-label_pred_test_rf = rf.predict(test_df[FEATURES])
-```
-
-#### save
-
-```{python}
-test_df['Pred_rf'] = label_pred_test_rf
+test_df['Pred_rf'] = rf.predict(test_df[FEATURES])
 test_df
 ```
 
-### save data set
+# save prediction
 
 ```{python}
-test_df.to_csv('/home/shaghayegh/class/New York project/test.csv', index=False)
+test_df.to_csv(PREDICTION_DATA_PATH, index=False)
 ```
