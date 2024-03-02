@@ -14,80 +14,97 @@ jupyter:
 
 # init
 
+
+## imports
+
 ```{python}
-import pandas as pd
-import warnings
 import math
 import numpy as np
+import os
+import pandas as pd
+import warnings
+
 from tabulate import tabulate
+
+warnings.filterwarnings('ignore')
+```
+
+## configs
+
+```{python}
+PREDICTION_DATA_PATH = os.path.expanduser('~/class/new_york/data/test.csv')
 ```
 
 # load data
 
 ```{python}
-top_50_areas_df = pd.read_csv('/home/shaghayegh/class/New York project/test.csv')
-top_50_areas_df
+pred_df = pd.read_csv(PREDICTION_DATA_PATH)
+pred_df
 ```
 
-```{python}
-warnings.filterwarnings('ignore')
-```
+# evaluation
 
-## top 50 areas mape & rmse
+
+## utillity functions
 
 ```{python}
 def mape(real, pred):
     return (abs(pred - real) / real).mean()
 
-
-mape_1_day_lag = mape(top_50_areas_df['Daily_trips'], top_50_areas_df['1_day_lag'])
-mape_1_day_lag
-```
-
-```{python}
-mape_7_days_lag = mape(top_50_areas_df['Daily_trips'], top_50_areas_df['7_days_lag'])
-mape_7_days_lag
-```
-
-```{python}
 def rmse(real, pred):
-    a =((pred - real) ** 2).mean()
-    return math.sqrt(a)
-
-rmse_1_day_lag = rmse(top_50_areas_df['Daily_trips'], top_50_areas_df['1_day_lag'])
-rmse_1_day_lag
+    return math.sqrt(((pred - real) ** 2).mean())
 ```
 
-```{python}
-rmse_7_days_lag = rmse(top_50_areas_df['Daily_trips'], top_50_areas_df['7_days_lag'])
-rmse_7_days_lag
-```
+## methods
 
 ```{python}
-top_50_areas_df['ratio'] = top_50_areas_df['1_day_lag'] / top_50_areas_df['8_days_lag']
-top_50_areas_df
+results_dict = {}
 ```
 
-```{python}
-top_50_areas_df['pred'] = top_50_areas_df['7_days_lag'] * top_50_areas_df['ratio']
-top_50_areas_df
-```
+### yesterday
 
 ```{python}
-mape_prediction = mape(top_50_areas_df['Daily_trips'], top_50_areas_df['pred'] )
-mape_prediction
+results_dict['yesterday'] = {
+    'mape': mape(pred_df['Daily_trips'], pred_df['1_day_lag']),
+    'rmse': rmse(pred_df['Daily_trips'], pred_df['1_day_lag'])
+}
 ```
 
-```{python}
-rmse_prediction = rmse(top_50_areas_df['Daily_trips'], top_50_areas_df['pred'] )
-rmse_prediction
-```
+### last week
 
 ```{python}
-result_table = [["1_day_lag",mape_1_day_lag, rmse_1_day_lag],
-         ["7_days_lag",mape_7_days_lag, rmse_7_days_lag],
-         ["Prediction",mape_prediction, rmse_prediction]]
-print(tabulate(result_table, headers=["FREQUENCY","MAPE", "RMSE"], tablefmt="simple_grid"))
+results_dict['last_week'] = {
+    'mape': mape(pred_df['Daily_trips'], pred_df['7_day_lag']),
+    'rmse': rmse(pred_df['Daily_trips'], pred_df['7_day_lag'])
+}
+```
+
+### decision tree 
+
+```{python}
+results_dict['decision_tree'] = {
+    'mape': mape(pred_df['Daily_trips'], pred_df['Pred_dt']),
+    'rmse': rmse(pred_df['Daily_trips'], pred_df['Pred_dt'])
+}
+```
+
+### random forest
+
+```{python}
+results_dict['random_forest'] = {
+    'mape': mape(pred_df['Daily_trips'], pred_df['Pred_rf']),
+    'rmse': rmse(pred_df['Daily_trips'], pred_df['Pred_rf'])
+}
+```
+
+## summerize
+
+```{python}
+result_table = [
+    [method, results_dict[method]['mape'], results_dict[method]['rmse']]
+    for method in results_dict
+]
+print(tabulate(result_table, headers=["Method","MAPE", "RMSE"], tablefmt="simple_grid"))
 ```
 
 ```{python}
