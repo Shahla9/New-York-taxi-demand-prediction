@@ -106,7 +106,3 @@ result_table = [
 ]
 print(tabulate(result_table, headers=["Method","MAPE", "RMSE"], tablefmt="simple_grid"))
 ```
-
-```{python}
-
-```

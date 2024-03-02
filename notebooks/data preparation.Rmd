@@ -120,7 +120,7 @@ pop_areas_trips_df.dropna(inplace=True)
 pop_areas_trips_df
 ```
 
-## top 50 areas data frame
+## save output
 
 ```{python}
 pop_areas_trips_df.to_csv(OUTPUT_DATASET_PATH, index=False)

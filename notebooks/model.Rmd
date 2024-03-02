@@ -90,6 +90,9 @@ test_df
 
 ## random forest
 
+
+### training model
+
 ```{python}
 rf = RandomForestRegressor(n_estimators=500)
 rf.fit(train_df[FEATURES], train_df[LABEL])
