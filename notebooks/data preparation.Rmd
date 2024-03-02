@@ -23,39 +23,31 @@ import numpy as np
 import os
 import pandas as pd
 import warnings
+
+warnings.filterwarnings('ignore')
 ```
 
 ## configs
 
 ```{python}
-DATA_PATH = os.path.expanduser('~/class')
-PATH = [
-        "/home/shaghayegh/Downloads/project/NY/yellow_tripdata_2023-01.parquet"
-        ,"/home/shaghayegh/Downloads/project/NY/yellow_tripdata_2023-02.parquet"
-        ,"/home/shaghayegh/Downloads/project/NY/yellow_tripdata_2023-03.parquet"
-        ,"/home/shaghayegh/Downloads/project/NY/yellow_tripdata_2023-04.parquet"
-       ]
-```
+DATA_PATH = os.path.expanduser('~/class/new_york/data/.data/')
 
-```{python}
-PATH_ZONES = "/home/shaghayegh/Downloads/project/NY/taxi_zones/taxi_zones.shp"
+START_DATE = pd.Timestamp('2023-01-01').date()
+END_DATE = pd.Timestamp('2023-04-30').date()
+
+POPULAR_AREA_COUNT = 50
+LAG_DAYS_COUNT = 10 
+
+OUTPUT_DATASET_PATH = os.path.expanduser('~/class/new_york/data/dataset.csv')
 ```
 
 # load data
 
 ```{python}
-df_zones = gpd.read_file(PATH_ZONES)
+rides_df = pd.read_parquet(DATA_PATH)
+print(rides_df.columns)
+rides_df
 ```
-
-```{python}
-df = pd.concat(pd.read_parquet(path) for path in PATH)
-```
-
-# concat data
-
-<!-- #region jp-MarkdownHeadingCollapsed=true -->
-## show data
-<!-- #endregion -->
 
 ```{python}
 df
@@ -65,232 +57,71 @@ df
 df.iloc[0]
 ```
 
-<!-- #region jp-MarkdownHeadingCollapsed=true -->
 # data preprocessing
-<!-- #endregion -->
+
+
+## filter by date
 
 ```{python}
-df['Date'] = pd.to_datetime(df['tpep_pickup_datetime']).dt.date
-df
+rides_df['Date'] = pd.to_datetime(rides_df['tpep_pickup_datetime']).dt.date
+rides_df= rides_df[rides_df['Date'] >= START_DATE]
+rides_df = rides_df[END_DATE >= rides_df['Date']]
+rides_df
 ```
 
-```{python}
-date_min = pd.Timestamp('2023-01-01').date()
-date_max = pd.Timestamp('2023-04-30').date()
-df= df[df['Date'] >= date_min]
-df = df[date_max >= df['Date']]
-df
-```
+## defining popular areas
 
 ```{python}
-df['Week_days'] = df['tpep_pickup_datetime'].dt.day_name()
-df
-```
-
-```{python}
-df.rename(columns={'PULocationID': 'LocationID'}, inplace=True)
-```
-
-```{python}
-merged_df = pd.merge(df, df_zones[['LocationID', 'zone']], on='LocationID')
-merged_df[['LocationID', 'zone']]
-```
-
-```{python}
-merged_df
-```
-
-```{python}
-warnings.filterwarnings('ignore')
-```
-
-<!-- #region jp-MarkdownHeadingCollapsed=true -->
-# top 50 areas 
-<!-- #endregion -->
-
-```{python}
-pop_area_df = df.groupby('LocationID')['VendorID'].count().sort_values(ascending=False)
-pop_area_df.head(50)
-```
-
-```{python}
-pop_area_df = merged_df.groupby('zone')['VendorID'].count().sort_values(ascending=False)
+pop_area_df = (
+    rides_df
+    .groupby('PULocationID')
+    ['VendorID']
+    .count()
+    .sort_values(ascending=False)
+    .head(POPULAR_AREA_COUNT)
+    .reset_index(name='count')
+)
+popular_areas_list = pop_area_df['PULocationID'].tolist()
 pop_area_df
 ```
 
-```{python}
-pop_area_df = merged_df.groupby('zone')['VendorID'].count().sort_values(ascending=False).reset_index(name='count')
-pop_area_df.head(50)
-```
+## **labelling** - trips per area and date
 
 ```{python}
-top_50_areas = pop_area_df.head(50)['zone'].tolist()
-top_50_areas
-```
-
-```{python}
-pop_area_df = merged_df.groupby('zone')['LocationID'].count().sort_values(ascending=False).reset_index(name='count')
-pop_area_df.head(50)
-```
-
-# trips per area and date
-
-```{python}
-Daily_trips_df = merged_df.groupby(['Date', 'LocationID', 'Week_days']).size().reset_index(name='Daily_trips')
-
-Daily_trips_df
-```
-
-## 10 days df of top 50 areas 
-
-```{python}
-a = merged_df[merged_df['zone'].isin(top_50_areas)]
-top_50_areas_id = set(a['LocationID'])
-top_50_areas_id
-```
-
-```{python}
-top_50_areas_df = Daily_trips_df[Daily_trips_df['LocationID'].isin(top_50_areas_id)]
-top_50_areas_df
-```
-
-```{python}
-#all_trips_df['1_day_lag'] = all_trips_df.rolling(window=2, on = 'Daily_trips')
-#all_trips_df
-```
-
-```{python}
-#all_trips_df['1_day_lag'] = all_trips_df['Daily_trips'].rolling(window=2).mean()
-#all_trips_df
-```
-
-```{python}
-top_50_areas_df['1_day_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=2)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
+daily_trips_df = (
+    rides_df
+    .groupby(['Date', 'PULocationID'])
+    .size()
+    .reset_index(name='Daily_trips')
 )
-top_50_areas_df
+
+daily_trips_df
 ```
 
-```{python}
-#all_trips_df['1_day_lag'] = all_trips_df.groupby('LocationID')['Daily_trips'].transform(lambda x: x.shift(1))
-```
+## filter popular areas daily trips
 
 ```{python}
-top_50_areas_df['2_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=3)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
+pop_areas_trips_df = daily_trips_df[daily_trips_df['PULocationID'].isin(popular_areas_list)]
+pop_areas_trips_df
 ```
 
-```{python}
-top_50_areas_df['3_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=4)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df = top_50_areas_df.dropna()
-top_50_areas_df
-```
+## **feature extraction** - lag daily trips
 
 ```{python}
-top_50_areas_df['4_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=5)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
-```
-
-```{python}
-top_50_areas_df['5_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=6)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
-```
-
-```{python}
-top_50_areas_df['6_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=7)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
-```
-
-```{python}
-top_50_areas_df['7_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=8)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
-```
-
-```{python}
-top_50_areas_df['8_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=9)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
-```
-
-```{python}
-top_50_areas_df['9_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=10)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df
-```
-
-```{python}
-top_50_areas_df['10_days_lag'] = (
-    top_50_areas_df
-    .groupby('LocationID')['Daily_trips']
-    .rolling(window=11)
-    .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
-    .reset_index(level=0, drop=True)
-)
-top_50_areas_df = top_50_areas_df.dropna()
-top_50_areas_df
+for lag in range(1, LAG_DAYS_COUNT+1):
+    pop_areas_trips_df[f'{lag}_day_lag'] = (
+        pop_areas_trips_df
+        .groupby('PULocationID')['Daily_trips']
+        .rolling(window=lag+1)
+        .apply(lambda x: x.iloc[0] if len(x) >= 1 else None)
+        .reset_index(level=0, drop=True)
+    )
+pop_areas_trips_df.dropna(inplace=True)
+pop_areas_trips_df
 ```
 
 ## top 50 areas data frame
 
 ```{python}
-top_50_areas_df.to_csv('/home/shaghayegh/class/New York project/top50areas.csv', index=False)
-```
-
-```{python}
-top_50_areas_df = pd.read_csv('/home/shaghayegh/class/New York project/top50areas.csv')
-top_50_areas_df
-```
-
-```{python}
-
+pop_areas_trips_df.to_csv(OUTPUT_DATASET_PATH, index=False)
 ```
