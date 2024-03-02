@@ -14,16 +14,21 @@ jupyter:
 
 # init
 
+
+## imports
+
 ```{python}
-import pandas as pd
 import geopandas as gpd
-import warnings
 import numpy as np
+import os
+import pandas as pd
+import warnings
 ```
 
 ## configs
 
 ```{python}
+DATA_PATH = os.path.expanduser('~/class')
 PATH = [
         "/home/shaghayegh/Downloads/project/NY/yellow_tripdata_2023-01.parquet"
         ,"/home/shaghayegh/Downloads/project/NY/yellow_tripdata_2023-02.parquet"
