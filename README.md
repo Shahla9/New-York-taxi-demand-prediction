@@ -12,7 +12,7 @@ https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-04.parquetâ
 
 The goal of this project is to forecast taxi demand in New York. To accomplish this, the first step involved counting the daily trips from all locations per day. Subsequently, the data was refined to focus on the busiest areas.
 
-## Result:
+# Result:
 
 Result table for JFK airport (the busiest location):
 
