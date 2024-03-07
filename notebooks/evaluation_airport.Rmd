@@ -33,13 +33,17 @@ warnings.filterwarnings('ignore')
 
 ```{python}
 PREDICTION_DATA_PATH = os.path.expanduser('~/class/new_york/data/test.csv')
+
+AIRPORT_LOCATIONID = 132
 ```
 
 # load data
 
 ```{python}
 pred_df = pd.read_csv(PREDICTION_DATA_PATH)
-pred_df
+
+airport_pred_df = pred_df[pred_df['PULocationID'] == AIRPORT_LOCATIONID]
+airport_pred_df
 ```
 
 # evaluation
@@ -65,8 +69,8 @@ results_dict = {}
 
 ```{python}
 results_dict['yesterday'] = {
-    'mape': mape(pred_df['Daily_trips'], pred_df['1_day_lag']),
-    'rmse': rmse(pred_df['Daily_trips'], pred_df['1_day_lag'])
+    'mape': mape(airport_pred_df['Daily_trips'], airport_pred_df['1_day_lag']),
+    'rmse': rmse(airport_pred_df['Daily_trips'], airport_pred_df['1_day_lag'])
 }
 ```
 
@@ -74,8 +78,8 @@ results_dict['yesterday'] = {
 
 ```{python}
 results_dict['last_week'] = {
-    'mape': mape(pred_df['Daily_trips'], pred_df['7_day_lag']),
-    'rmse': rmse(pred_df['Daily_trips'], pred_df['7_day_lag'])
+    'mape': mape(airport_pred_df['Daily_trips'], airport_pred_df['7_day_lag']),
+    'rmse': rmse(airport_pred_df['Daily_trips'], airport_pred_df['7_day_lag'])
 }
 ```
 
@@ -83,8 +87,8 @@ results_dict['last_week'] = {
 
 ```{python}
 results_dict['decision_tree'] = {
-    'mape': mape(pred_df['Daily_trips'], pred_df['Pred_dt']),
-    'rmse': rmse(pred_df['Daily_trips'], pred_df['Pred_dt'])
+    'mape': mape(airport_pred_df['Daily_trips'], airport_pred_df['Pred_dt']),
+    'rmse': rmse(airport_pred_df['Daily_trips'], airport_pred_df['Pred_dt'])
 }
 ```
 
@@ -92,8 +96,8 @@ results_dict['decision_tree'] = {
 
 ```{python}
 results_dict['random_forest'] = {
-    'mape': mape(pred_df['Daily_trips'], pred_df['Pred_rf']),
-    'rmse': rmse(pred_df['Daily_trips'], pred_df['Pred_rf'])
+    'mape': mape(airport_pred_df['Daily_trips'], airport_pred_df['Pred_rf']),
+    'rmse': rmse(airport_pred_df['Daily_trips'], airport_pred_df['Pred_rf'])
 }
 ```
 
