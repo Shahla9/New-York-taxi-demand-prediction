@@ -28,7 +28,7 @@ Result table for the busiest locations:
 
 ### Data Preparation:
 
-In the initial phase, the "Data Preparation" notebook outlines the steps taken to fetch, clean, and prepare taxi demand data sourced from the New York City government's website. Key steps included:
+In the initial phase, the "Data Preparation" notebook outlines the steps taken to fetch, clean, and prepare taxi record data sourced from the New York City government's website. Key steps included:
 
 #### Data Fetching and Cleaning:
 Removing date outliers and cleaning the dataset to ensure accuracy.
@@ -42,6 +42,7 @@ Creating lag features ranging from 1 to 10 days to capture temporal dependencies
 Addressing missing values to maintain dataset integrity.
 
 ### Model:
+
 The "Model" notebook focuses on machine learning models. Here, the dataset—comprising the busiest locations' daily trip sums and extracted features for the first four months of 2023—is prepared for modeling. The features included are:
 
 FEATURES = [
@@ -69,9 +70,8 @@ The "Evaluation" notebook delves into the performance assessment of the predicti
 ### Evaluation for JFK Airport:
 
 In the final notebook, "EVALUATION_AIRPORT," a focused analysis on JFK Airport reveals lower residual errors compared to the broader study encompassing the 50 popular areas. This targeted evaluation underscores the model's effectiveness in predicting taxi demand at a highly trafficked location.
-Libraries Used
 
-The project utilizes a range of libraries to facilitate data manipulation, analysis, and modeling:
+#### The project utilizes a range of libraries to facilitate data manipulation, analysis, and modeling:
 
 ##### Geopandas: For geographic data processing.
 ##### Numpy: For numerical computations.
