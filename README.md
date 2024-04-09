@@ -11,7 +11,7 @@ This project aims to forecast taxi demand in New York City by leveraging machine
 
 ## Result Summary:
 
-The comparison of different predictive methods indicates that the Random Forest model outperforms others by achieving the lowest residual errors. Detailed findings are organized into four Jupyter notebooks, each focusing on distinct phases of the project - Data Preparation, Modeling, Machine Learning Evaluation, and a targeted Evaluation for JFK Airport.
+The comparison of different predictive methods indicates that the Random Forest model outperforms others by achieving the lowest residual errors. Detailed findings are organized into four Jupyter notebooks, each focusing on distinct phases of the project - Data Preparation, Machine Learning Time Series and Forcasting Modeling,  Evaluation, and a targeted Evaluation for JFK Airport.
 
 Result table for JFK airport (the busiest location):
 
