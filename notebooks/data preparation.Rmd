@@ -46,15 +46,7 @@ OUTPUT_DATASET_PATH = os.path.expanduser('~/class/new_york/data/dataset.csv')
 ```{python}
 rides_df = pd.read_parquet(DATA_PATH)
 print(rides_df.columns)
-rides_df
-```
-
-```{python}
-df
-```
-
-```{python}
-df.iloc[0]
+rides_df.head()
 ```
 
 # data preprocessing
@@ -66,7 +58,7 @@ df.iloc[0]
 rides_df['Date'] = pd.to_datetime(rides_df['tpep_pickup_datetime']).dt.date
 rides_df= rides_df[rides_df['Date'] >= START_DATE]
 rides_df = rides_df[END_DATE >= rides_df['Date']]
-rides_df
+rides_df.head()
 ```
 
 ## defining popular areas
@@ -82,7 +74,7 @@ pop_area_df = (
     .reset_index(name='count')
 )
 popular_areas_list = pop_area_df['PULocationID'].tolist()
-pop_area_df
+pop_area_df.head()
 ```
 
 ## **labelling** - trips per area and date
@@ -95,14 +87,14 @@ daily_trips_df = (
     .reset_index(name='Daily_trips')
 )
 
-daily_trips_df
+daily_trips_df.head()
 ```
 
 ## filter popular areas daily trips
 
 ```{python}
 pop_areas_trips_df = daily_trips_df[daily_trips_df['PULocationID'].isin(popular_areas_list)]
-pop_areas_trips_df
+pop_areas_trips_df.head()
 ```
 
 ## **feature extraction** - lag daily trips
@@ -117,7 +109,7 @@ for lag in range(1, LAG_DAYS_COUNT+1):
         .reset_index(level=0, drop=True)
     )
 pop_areas_trips_df.dropna(inplace=True)
-pop_areas_trips_df
+pop_areas_trips_df.head()
 ```
 
 ## save output

@@ -43,7 +43,7 @@ AIRPORT_LOCATIONID = 132
 pred_df = pd.read_csv(PREDICTION_DATA_PATH)
 
 airport_pred_df = pred_df[pred_df['PULocationID'] == AIRPORT_LOCATIONID]
-airport_pred_df
+airport_pred_df.head()
 ```
 
 # evaluation

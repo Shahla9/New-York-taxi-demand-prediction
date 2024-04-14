@@ -49,7 +49,7 @@ PREDICTION_DATA_PATH = os.path.expanduser('~/class/new_york/data/test.csv')
 
 ```{python}
 dataset_df = pd.read_csv(DATASET_PATH)
-dataset_df
+dataset_df.head()
 ```
 
 # train/test split
@@ -61,11 +61,11 @@ def train_test_split(dataset_df, split_date):
     return train_df, test_df
 
 train_df, test_df = train_test_split(dataset_df, TRAIN_TEST_SPLIT_DATE )
-train_df
+train_df.head()
 ```
 
 ```{python}
-test_df
+test_df.head()
 ```
 
 # methods
@@ -77,6 +77,16 @@ test_df
 ### training model
 
 ```{python}
+dt_regressor = DecisionTreeRegressor(max_depth=500)
+
+dt_regressor.fit(train_df[FEATURES], train_df[LABEL]) 
+
+max_depth = dt_regressor.tree_.max_depth
+
+print("Maximum tree depth in the Decision Tree Regressor:", max_depth)
+```
+
+```{python}
 dt = DecisionTreeRegressor(max_depth=16, min_samples_split=30, min_samples_leaf=40)
 dt.fit(train_df[FEATURES], train_df[LABEL])
 ```
@@ -85,7 +95,7 @@ dt.fit(train_df[FEATURES], train_df[LABEL])
 
 ```{python}
 test_df['Pred_dt'] = dt.predict(test_df[FEATURES])
-test_df
+test_df.head()
 ```
 
 ## random forest
@@ -102,7 +112,7 @@ rf.fit(train_df[FEATURES], train_df[LABEL])
 
 ```{python}
 test_df['Pred_rf'] = rf.predict(test_df[FEATURES])
-test_df
+test_df.head()
 ```
 
 # save prediction

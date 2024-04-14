@@ -39,7 +39,7 @@ PREDICTION_DATA_PATH = os.path.expanduser('~/class/new_york/data/test.csv')
 
 ```{python}
 pred_df = pd.read_csv(PREDICTION_DATA_PATH)
-pred_df
+pred_df.head()
 ```
 
 # evaluation
