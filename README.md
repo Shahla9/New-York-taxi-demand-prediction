@@ -59,7 +59,7 @@ For the model's train-test split, data from the first three months are used for 
 
 #### Machine Learning:
 
-This phase employs Decision Tree and Random Forest algorithms to predict taxi demands. The selection of these models is based on their ability to handle non-linear data and provide insights into the importance of different features affecting taxi demand.
+In this phase, Decision Tree and Random Forest algorithms are used to predict taxi demand. These models are well-suited for this task because they can handle non-linear relationships in the data. Decision Trees offer interpretability, showing the effect of individual features on taxi demand. Meanwhile, Random Forest, being an ensemble method, improves prediction accuracy by combining the output of multiple decision trees, reducing overfitting, and providing insights into feature importance.
 
 
 ### Evaluation:
